@@ -20,14 +20,6 @@ class CustomThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
-
-        // Настройки для оптимальной работы на M1
-        if (System.getProperty("os.arch").equals("aarch64")) {
-            t.setPriority(Thread.NORM_PRIORITY);
-        } else {
-            t.setPriority(Thread.NORM_PRIORITY);
-        }
-
         t.setDaemon(false);
         logger.fine("Created new thread: " + t.getName());
         return t;
