@@ -40,7 +40,7 @@ public class Main {
             pool.execute(() -> {
                 logger.info("Task " + taskId + " started");
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                     completedTasks.incrementAndGet();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
