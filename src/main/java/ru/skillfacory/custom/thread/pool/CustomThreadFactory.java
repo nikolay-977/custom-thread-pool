@@ -1,24 +1,35 @@
 package ru.skillfacory.custom.thread.pool;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
-public class CustomThreadFactory implements ThreadFactory {
-    private static final Logger logger = LoggerFactory.getLogger(CustomThreadFactory.class);
-    private final String poolName;
-    private final AtomicInteger threadCounter = new AtomicInteger(1);
+class CustomThreadFactory implements ThreadFactory {
+    private static final Logger logger = Logger.getLogger(CustomThreadFactory.class.getName());
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final String namePrefix;
 
-    public CustomThreadFactory(String poolName) {
-        this.poolName = poolName;
+    public CustomThreadFactory() {
+        this("CustomThreadPool-Worker-");
+    }
+
+    public CustomThreadFactory(String namePrefix) {
+        this.namePrefix = namePrefix;
     }
 
     @Override
     public Thread newThread(Runnable r) {
-        String threadName = poolName + "-worker-" + threadCounter.getAndIncrement();
-        logger.info("[ThreadFactory] Created new thread: {}", threadName);
-        return new Thread(r, threadName);
+        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+
+        // Настройки для оптимальной работы на M1
+        if (System.getProperty("os.arch").equals("aarch64")) {
+            t.setPriority(Thread.NORM_PRIORITY);
+        } else {
+            t.setPriority(Thread.NORM_PRIORITY);
+        }
+
+        t.setDaemon(false);
+        logger.fine("Created new thread: " + t.getName());
+        return t;
     }
 }

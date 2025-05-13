@@ -1,9 +1,11 @@
 package ru.skillfacory.custom.thread.pool;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
-public interface CustomExecutor {
+public interface CustomExecutor extends Executor {
+    @Override
     void execute(Runnable command);
 
     <T> Future<T> submit(Callable<T> callable);
@@ -11,8 +13,4 @@ public interface CustomExecutor {
     void shutdown();
 
     void shutdownNow();
-
-    boolean isShutdown();
-
-    boolean isTerminated();
 }

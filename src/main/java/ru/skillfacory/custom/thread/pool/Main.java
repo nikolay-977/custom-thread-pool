@@ -1,53 +1,53 @@
 package ru.skillfacory.custom.thread.pool;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+    private static final AtomicInteger completedTasks = new AtomicInteger(0);
+    private static final AtomicInteger rejectedTasks = new AtomicInteger(0);
 
-    public static void main(String[] args) throws InterruptedException {
-        CustomThreadFactory threadFactory = new CustomThreadFactory("MyPool");
-        CustomRejectedExecutionHandler rejectionHandler = new CustomRejectedExecutionHandler();
+    public static void main(String[] args) {
+        // Настройка логирования
+        Logger.getLogger("").setLevel(Level.INFO);
 
-        CustomThreadPoolExecutor executor = new CustomThreadPoolExecutor(
-                2, 4, 5,
-                2, 1, threadFactory, rejectionHandler
+        // Создание пула с оптимизацией для M1
+        CustomExecutor pool = new CustomThreadPool(
+                2,  // corePoolSize
+                4,  // maxPoolSize
+                5,  // keepAliveTime
+                TimeUnit.SECONDS,
+                5,  // queueSize
+                1   // minSpareThreads
         );
 
+        logger.info("Starting thread pool demonstration on " + System.getProperty("os.arch"));
+
+        demo(pool);
+
+        logger.info("\nFinal Statistics:");
+        logger.info("Total completed tasks: " + completedTasks.get());
+        logger.info("Total rejected tasks: " + rejectedTasks.get());
+    }
+
+    private static void demo(CustomExecutor pool) {
+        logger.info("\nTesting normal operation...");
         for (int i = 0; i < 10; i++) {
             final int taskId = i;
-            try {
-                Runnable task = new TaskWrapper(
-                        () -> {
-                            logger.info("Task {} started", taskId);
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                logger.warn("Task {} interrupted", taskId);
-                                Thread.currentThread().interrupt();
-                            }
-                            logger.info("Task {} completed", taskId);
-                        },
-                        "Task-" + taskId,
-                        "ID-" + taskId
-                );
-
-                executor.execute(task);
-            } catch (RejectedExecutionException e) {
-                logger.error("Task {} rejected: {}", taskId, e.getMessage());
-            }
-            Thread.sleep(200);
+            pool.execute(() -> {
+                logger.info("Task " + taskId + " started");
+                try {
+                    Thread.sleep(500);
+                    completedTasks.incrementAndGet();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                logger.info("Task " + taskId + " completed");
+            });
         }
-
-        executor.shutdown();
-
-        while (!executor.isTerminated()) {
-            Thread.sleep(1000);
-        }
-
-        logger.info("All tasks completed, thread pool shutdown");
+        pool.shutdown();
     }
 }
