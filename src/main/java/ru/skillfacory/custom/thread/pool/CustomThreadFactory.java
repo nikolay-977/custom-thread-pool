@@ -2,15 +2,13 @@ package ru.skillfacory.custom.thread.pool;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 class CustomThreadFactory implements ThreadFactory {
-    private static final Logger logger = Logger.getLogger(CustomThreadFactory.class.getName());
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
 
     public CustomThreadFactory() {
-        this("CustomThreadPool-Worker-");
+        this("MyPool-worker-");
     }
 
     public CustomThreadFactory(String namePrefix) {
@@ -19,9 +17,11 @@ class CustomThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
-        t.setDaemon(false);
-        logger.fine("Created new thread: " + t.getName());
-        return t;
+        String threadName = namePrefix + threadNumber.getAndIncrement();
+        Thread thread = new Thread(r, threadName);
+        System.out.println("[ThreadFactory] Creating new thread: " + threadName);
+        thread.setUncaughtExceptionHandler((t, e) ->
+                System.out.println("[Worker] " + t.getName() + " encountered exception: " + e));
+        return thread;
     }
 }
