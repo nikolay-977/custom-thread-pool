@@ -79,7 +79,6 @@ public class CustomThreadPool implements CustomExecutor {
             }
         }
 
-        // 4. Последняя попытка перед отказом
         rejectedExecutionHandler.rejectedExecution(task, this);
     }
 

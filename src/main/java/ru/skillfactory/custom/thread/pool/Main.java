@@ -1,5 +1,6 @@
 package ru.skillfactory.custom.thread.pool;
 
+import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,9 +11,14 @@ public class Main {
     private static final AtomicInteger interruptedTasks = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
+        demo(new RejectPolicy(), "MyPoolWithRejectedTasks");
+//        demo(new RetryPolicy(), "MyPoolWithRetriedTasks");
+    }
+
+    private static void demo(CustomRejectedExecutionHandler customRejectedExecutionHandler, String poolName){
         // Создаем пул потоков
         CustomThreadPool pool = new CustomThreadPool(
-                4, 8, 5, TimeUnit.SECONDS, 10, 1, new CustomAbortPolicy(), "MyThreadPool");
+                2, 4, 5, TimeUnit.SECONDS, 5, 1, customRejectedExecutionHandler, poolName);
 
         // Запускаем задачи
         for (int i = 0; i < 40; i++) {
@@ -35,17 +41,20 @@ public class Main {
             }
         }
 
-        Thread.sleep(15000);
-        pool.shutdown();
-
         try {
+            Thread.sleep(10000);
+            pool.shutdown();
             if (!pool.awaitTermination(5, TimeUnit.SECONDS)) {
                 System.out.println("Forcing shutdown because tasks did not finish in time");
-                pool.shutdownNow();
+                List<Runnable> tasks = pool.shutdownNow();
+                System.out.println("Forcing shutdown because tasks: " + tasks.size());
+            } else {
+                System.out.println("All tasks completed. ");
             }
         } catch (InterruptedException e) {
             System.out.println("Main thread interrupted while waiting for pool termination");
-            pool.shutdownNow();
+            List<Runnable> tasks = pool.shutdownNow();
+            System.out.println("Interrupted tasks while waiting for pool termination: " + tasks.size());
         }
 
         System.out.println("Program finished");

@@ -1,11 +1,8 @@
 package ru.skillfactory.custom.thread.pool;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Worker implements Runnable {
-    private static final Logger logger = Logger.getLogger(Worker.class.getName());
     private static final AtomicLong workerCounter = new AtomicLong(0);
 
     private final CustomTaskQueue taskQueue;
@@ -59,9 +56,9 @@ public class Worker implements Runnable {
             completedTasks++;
             lastActivityTime = System.currentTimeMillis();
         } catch (RuntimeException e) {
-            logger.log(Level.SEVERE, String.format(
-                    "Task execution failed in worker %d (pool: %s)",
-                    workerId, pool.toString()), e);
+            System.out.printf(
+                    "Task execution failed in worker %d (pool: %s)%n",
+                    workerId, pool.getClass().getSimpleName());
             throw e;
         } finally {
             markIdle();
@@ -83,9 +80,9 @@ public class Worker implements Runnable {
 
     private void handleInterruption(InterruptedException e) {
         if (isActive && !pool.isShutdown()) {
-            logger.log(Level.WARNING, String.format(
-                    "Worker %d was interrupted unexpectedly (pool: %s)",
-                    workerId, pool.toString()), e);
+            System.out.printf(
+                    "Worker %d was interrupted unexpectedly (pool: %s)%n",
+                    workerId, pool.getClass().getSimpleName());
             Thread.currentThread().interrupt();
         }
     }
@@ -121,9 +118,9 @@ public class Worker implements Runnable {
         try {
             pool.afterExecute(currentThread);
             pool.onWorkerExit(this);
-            logger.info(String.format(
-                    "Worker %d terminated. Completed tasks: %d (pool: %s)",
-                    workerId, completedTasks, pool.toString()));
+            System.out.printf(
+                    "Worker %d terminated. Completed tasks: %d (pool: %s)%n",
+                    workerId, completedTasks, pool.getClass().getSimpleName());
         } finally {
             currentThread = null;
         }
