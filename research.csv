@@ -1,4 +1,4 @@
-Test Name,Total,Successful,Rejected
-Basic Functionality,10,10,0
-Overload Test,20,20,0
-Peak Load Test,100,100,0
+Test Name,Total,Successful,Rejected,Duration (ms)
+Basic Functionality,10,8,0,8105
+Overload Test,20,8,0,11088
+Peak Load Test,100,28,0,35385
