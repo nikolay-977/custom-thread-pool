@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// Фабрика для создания потоков, которая будет присваивать потокам уникальные имена
-// и логировать события их создания и завершения.
+/**
+ * Фабрика для создания потоков, которая будет присваивать потокам уникальные имена
+ * и логировать события их создания и завершения.
+ */
 public class CustomThreadFactory implements ThreadFactory {
     private static final Logger logger = LoggerFactory.getLogger(CustomThreadFactory.class);
     private final AtomicInteger threadCounter = new AtomicInteger(0);
