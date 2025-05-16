@@ -11,8 +11,10 @@ public class Main {
     private static final AtomicInteger interruptedTasks = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
-        demo(new RejectPolicy(), "MyPoolWithRejectedTasks");
-//        demo(new RetryPolicy(), "MyPoolWithRetriedTasks");
+        // Демонстрируется обработки ситуации, когда поступает слишком много задач (задачи отклоняются).
+        demo(new RejectPolicy(), "MyPool-with-rejected-tasks");
+        // Демонстрируется обработки ситуации, когда поступает слишком много задач (задачи обрабатываются согласно заданной политике).
+        demo(new RetryPolicy(), "MyPool-with-retried-tasks");
     }
 
     private static void demo(CustomRejectedExecutionHandler customRejectedExecutionHandler, String poolName) {

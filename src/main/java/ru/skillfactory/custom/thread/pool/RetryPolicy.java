@@ -3,6 +3,8 @@ package ru.skillfactory.custom.thread.pool;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// Обработка отказов
+// Пробуем повторно выполнить в текущем потоке
 public class RetryPolicy implements CustomRejectedExecutionHandler {
     private final AtomicInteger rejectedCount = new AtomicInteger();
     private final AtomicInteger retryerCount = new AtomicInteger();

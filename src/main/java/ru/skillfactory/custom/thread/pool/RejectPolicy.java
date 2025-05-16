@@ -3,6 +3,8 @@ package ru.skillfactory.custom.thread.pool;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// Обработка отказов
+// Просто отклоняем
 public class RejectPolicy implements CustomRejectedExecutionHandler {
     private final AtomicInteger rejectedCount = new AtomicInteger();
 

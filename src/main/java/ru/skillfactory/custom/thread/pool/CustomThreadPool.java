@@ -56,6 +56,7 @@ public class CustomThreadPool implements CustomExecutor {
             return;
         }
 
+        // Распределение задач
         // 1. Быстрая попытка добавить в случайную очередь
         CustomTaskQueue randomQueue = taskQueues.get(ThreadLocalRandom.current().nextInt(taskQueues.size()));
         if (randomQueue.offer(task)) {
@@ -79,7 +80,7 @@ public class CustomThreadPool implements CustomExecutor {
 
         rejectedExecutionHandler.rejectedExecution(task, this);
     }
-
+    
     private CustomTaskQueue findLeastLoadedQueue() {
         CustomTaskQueue leastLoaded = null;
         int minSize = Integer.MAX_VALUE;

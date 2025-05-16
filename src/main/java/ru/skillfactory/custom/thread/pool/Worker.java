@@ -1,5 +1,6 @@
 package ru.skillfactory.custom.thread.pool;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Worker implements Runnable {
@@ -11,7 +12,7 @@ public class Worker implements Runnable {
     private Runnable firstTask;
     private volatile boolean isActive = true;
     private volatile Thread currentThread;
-    private volatile long completedTasks = 0;
+    private final AtomicInteger completedTasks = new AtomicInteger();
     private volatile long lastActivityTime = System.currentTimeMillis();
     private volatile boolean isIdle = true;
 
@@ -34,11 +35,15 @@ public class Worker implements Runnable {
                 firstTask = null;
             }
 
+            // Обрабатывать задачи из закрепленной за ним очереди.
+            // Перед выполнением новой задачи проверять, что пул не находится в состоянии завершения (shutdown).
             while (isActive && !pool.isShutdown()) {
                 Runnable task = getTask();
                 if (task != null) {
                     runTask(task);
                 } else if (shouldTerminate()) {
+                    // При отсутствии задач в течение времени, превышающего keepAliveTime, завершаться,
+                    // если общее число потоков превышает corePoolSize.
                     isActive = false;
                 }
             }
@@ -53,7 +58,7 @@ public class Worker implements Runnable {
         try {
             markBusy();
             task.run();
-            completedTasks++;
+            completedTasks.incrementAndGet();
             lastActivityTime = System.currentTimeMillis();
         } catch (RuntimeException e) {
             System.out.printf(
@@ -164,6 +169,6 @@ public class Worker implements Runnable {
     public String toString() {
         return String.format(
                 "Worker[%d, active=%b, idle=%b, tasks=%d, idleTime=%dms]",
-                workerId, isActive, isIdle, completedTasks, getIdleTime());
+                workerId, isActive, isIdle, completedTasks.get(), getIdleTime());
     }
 }
