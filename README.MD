@@ -5,7 +5,7 @@
 1. Клонируйте репозиторий:
 
 ```bash
-git clone https://github.com/nikolay-977/banking-api.git
+git clone https://github.com/nikolay-977/custom-thread-pool
 cd banking-api
  ```
 
