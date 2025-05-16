@@ -1,11 +1,15 @@
 package ru.skillfactory.custom.thread.pool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class CustomTaskQueue implements BlockingQueue<Runnable> {
+    private static final Logger logger = LoggerFactory.getLogger(CustomTaskQueue.class);
     private final BlockingQueue<Runnable> queue;
 
     public CustomTaskQueue(BlockingQueue<Runnable> queue) {
@@ -14,40 +18,51 @@ public class CustomTaskQueue implements BlockingQueue<Runnable> {
 
     @Override
     public boolean add(Runnable runnable) {
-        return queue.add(runnable);
+        boolean result = queue.add(runnable);
+        logger.info("Task added: {}", runnable);
+        return result;
     }
 
     @Override
     public boolean offer(Runnable task) {
         boolean result = queue.offer(task);
         if (result) {
-            System.out.println("Task added to queue: " + task);
+            logger.info("Task added to queue: {}", task);
         } else {
-            System.out.println("Failed to add task to queue: " + task);
+            logger.warn("Failed to add task to queue: {}", task);
         }
         return result;
     }
 
     @Override
     public Runnable remove() {
-        return queue.remove();
+        Runnable task = queue.remove();
+        logger.info("Task removed: {}", task);
+        return task;
     }
 
     @Override
     public void put(Runnable runnable) throws InterruptedException {
         queue.put(runnable);
+        logger.info("Task put in queue: {}", runnable);
     }
 
     @Override
     public boolean offer(Runnable runnable, long timeout, TimeUnit unit) throws InterruptedException {
-        return queue.offer(runnable, timeout, unit);
+        boolean result = queue.offer(runnable, timeout, unit);
+        if (result) {
+            logger.info("Task added to queue with timeout: {}", runnable);
+        } else {
+            logger.warn("Failed to add task to queue with timeout: {}", runnable);
+        }
+        return result;
     }
 
     @Override
     public Runnable poll() {
         Runnable task = queue.poll();
         if (task != null) {
-            System.out.println("Task retrieved from queue: " + task);
+            logger.info("Task retrieved from queue: {}", task);
         }
         return task;
     }
@@ -74,12 +89,14 @@ public class CustomTaskQueue implements BlockingQueue<Runnable> {
 
     @Override
     public Runnable take() throws InterruptedException {
-        return queue.take();
+        Runnable task = queue.take();
+        logger.info("Task taken from queue: {}", task);
+        return task;
     }
 
     @Override
     public Runnable poll(long timeout, TimeUnit unit) throws InterruptedException {
-        return queue.poll();
+        return queue.poll(timeout, unit);
     }
 
     @Override
@@ -89,7 +106,9 @@ public class CustomTaskQueue implements BlockingQueue<Runnable> {
 
     @Override
     public boolean remove(Object o) {
-        return queue.remove(o);
+        boolean result = queue.remove(o);
+        logger.info("Task removed from queue: {}", o);
+        return result;
     }
 
     @Override
@@ -99,22 +118,29 @@ public class CustomTaskQueue implements BlockingQueue<Runnable> {
 
     @Override
     public boolean addAll(Collection<? extends Runnable> c) {
-        return queue.addAll(c);
+        boolean result = queue.addAll(c);
+        logger.info("Tasks added to queue: {}", c);
+        return result;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return queue.removeAll(c);
+        boolean result = queue.removeAll(c);
+        logger.info("Tasks removed from queue: {}", c);
+        return result;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return queue.retainAll(c);
+        boolean result = queue.retainAll(c);
+        logger.info("Tasks retained in queue: {}", c);
+        return result;
     }
 
     @Override
     public void clear() {
         queue.clear();
+        logger.info("Queue cleared");
     }
 
     @Override
@@ -139,11 +165,15 @@ public class CustomTaskQueue implements BlockingQueue<Runnable> {
 
     @Override
     public int drainTo(Collection<? super Runnable> c) {
-        return queue.drainTo(c);
+        int drained = queue.drainTo(c);
+        logger.info("Drained {} tasks to collection", drained);
+        return drained;
     }
 
     @Override
     public int drainTo(Collection<? super Runnable> c, int maxElements) {
-        return queue.drainTo(c, maxElements);
+        int drained = queue.drainTo(c, maxElements);
+        logger.info("Drained {} tasks to collection with max elements {}", drained, maxElements);
+        return drained;
     }
 }

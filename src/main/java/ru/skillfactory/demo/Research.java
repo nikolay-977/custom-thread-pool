@@ -3,6 +3,8 @@ package ru.skillfactory.demo;
 import ru.skillfactory.custom.thread.pool.CustomThreadPool;
 import ru.skillfactory.custom.thread.pool.CustomThreadPoolAdapter;
 import ru.skillfactory.custom.thread.pool.RejectPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -14,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Research {
+    private static final Logger logger = LoggerFactory.getLogger(Research.class);
     private static final int TASK_COUNT = 100;
     private static final int TASK_DURATION_MS = 10;
     private static final String CSV_FILE = "research_results.csv";
@@ -28,12 +31,12 @@ public class Research {
             for (int maxPoolSize = 4; maxPoolSize <= 16; maxPoolSize += 2) {
                 for (int queueSize = 10; queueSize <= 40; queueSize += 10) {
                     for (int minSpareThreads = 0; minSpareThreads <= 2; minSpareThreads++) {
-                        System.out.printf("Testing configuration: corePoolSize=%d, maxPoolSize=%d, queueSize=%d, minSpareThreads=%d%n",
+                        logger.info("Testing configuration: corePoolSize={}, maxPoolSize={}, queueSize={}, minSpareThreads={}",
                                 corePoolSize, maxPoolSize, queueSize, minSpareThreads);
 
                         // Проверяем параметры перед созданием пула
                         if (maxPoolSize < corePoolSize || queueSize < 1 || minSpareThreads > corePoolSize) {
-                            System.out.println("Invalid thread pool parameters, skipping this configuration.");
+                            logger.warn("Invalid thread pool parameters, skipping this configuration.");
                             continue;
                         }
 
@@ -63,9 +66,9 @@ public class Research {
                 writer.write(line);
                 writer.newLine();
             }
-            System.out.println("Research complete. Results written to " + CSV_FILE);
+            logger.info("Research complete. Results written to {}", CSV_FILE);
         } catch (IOException e) {
-            System.err.println("Error writing CSV file: " + e.getMessage());
+            logger.error("Error writing CSV file: {}", e.getMessage());
         }
     }
 
@@ -119,7 +122,7 @@ public class Research {
         if (completed.get() == 0) completed.set(1); // избегать деления на 0
         long avgTime = duration / completed.get();
 
-        System.out.printf("%s: Completed %d/%d tasks in %dms (min %dms, max %dms)%n",
+        logger.info("{}: Completed {}/{} tasks in {}ms (min {}ms, max {}ms)",
                 pool.getClass().getSimpleName(), completed.get(), TASK_COUNT, duration, minTime.get(), maxTime.get());
 
         return new TestResult(duration, completed.get(), minTime.get(), maxTime.get());
@@ -129,7 +132,7 @@ public class Research {
                                        int corePoolSize, int maxPoolSize, int queueSize, int minSpareThreads, TestResult result) {
         long avgTime = result.duration / result.completed;
         double successRate = (result.completed * 100.0) / TASK_COUNT;
-        String line = String.format("%d,%d,%d,%s,%d,%d,%d,%d,%d,%.2f",
+        String line = String.format("%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f",
                 corePoolSize, maxPoolSize, queueSize, minSpareThreads,
                 avgTime,
                 result.minTime,

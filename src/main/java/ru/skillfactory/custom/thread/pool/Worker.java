@@ -1,9 +1,13 @@
 package ru.skillfactory.custom.thread.pool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Worker implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(Worker.class);
     private static final AtomicLong workerCounter = new AtomicLong(0);
 
     private final CustomTaskQueue taskQueue;
@@ -36,14 +40,11 @@ public class Worker implements Runnable {
             }
 
             // Обрабатывать задачи из закрепленной за ним очереди.
-            // Перед выполнением новой задачи проверять, что пул не находится в состоянии завершения (shutdown).
             while (isActive && !pool.isShutdown()) {
                 Runnable task = getTask();
                 if (task != null) {
                     runTask(task);
                 } else if (shouldTerminate()) {
-                    // При отсутствии задач в течение времени, превышающего keepAliveTime, завершаться,
-                    // если общее число потоков превышает corePoolSize.
                     isActive = false;
                 }
             }
@@ -57,13 +58,12 @@ public class Worker implements Runnable {
     private void runTask(Runnable task) {
         try {
             markBusy();
+            logger.info("Worker {} is executing task: {}", workerId, task);
             task.run();
             completedTasks++;
             lastActivityTime = System.currentTimeMillis();
         } catch (RuntimeException e) {
-            System.out.printf(
-                    "Task execution failed in worker %d (pool: %s)%n",
-                    workerId, pool.getClass().getSimpleName());
+            logger.error("Task execution failed in worker {} (pool: {})", workerId, pool.getClass().getSimpleName(), e);
             throw e;
         } finally {
             markIdle();
@@ -72,22 +72,18 @@ public class Worker implements Runnable {
 
     private boolean shouldKeepAlive() {
         return pool.getTotalThreads() > pool.getCorePoolSize() ||
-                (pool.getMinSpareThreads() > 0 &&
-                        pool.getIdleThreads() > pool.getMinSpareThreads());
+                (pool.getMinSpareThreads() > 0 && pool.getIdleThreads() > pool.getMinSpareThreads());
     }
 
     private boolean shouldTerminate() {
         return pool.isShutdown() ||
                 (pool.getTotalThreads() > pool.getCorePoolSize()) ||
-                (pool.getMinSpareThreads() > 0 &&
-                        pool.getIdleThreads() > pool.getMinSpareThreads());
+                (pool.getMinSpareThreads() > 0 && pool.getIdleThreads() > pool.getMinSpareThreads());
     }
 
     private void handleInterruption(InterruptedException e) {
         if (isActive && !pool.isShutdown()) {
-            System.out.printf(
-                    "Worker %d was interrupted unexpectedly (pool: %s)%n",
-                    workerId, pool.getClass().getSimpleName());
+            logger.warn("Worker {} was interrupted unexpectedly (pool: {})", workerId, pool.getClass().getSimpleName());
             Thread.currentThread().interrupt();
         }
     }
@@ -123,9 +119,7 @@ public class Worker implements Runnable {
         try {
             pool.afterExecute(currentThread);
             pool.onWorkerExit(this);
-            System.out.printf(
-                    "Worker %d terminated. Completed tasks: %d (pool: %s)%n",
-                    workerId, completedTasks, pool.getClass().getSimpleName());
+            logger.info("Worker {} terminated. Completed tasks: {} (pool: {})", workerId, completedTasks, pool.getClass().getSimpleName());
         } finally {
             currentThread = null;
         }
@@ -135,6 +129,7 @@ public class Worker implements Runnable {
         if (!isIdle) {
             isIdle = true;
             pool.incrementIdleThreads();
+            logger.info("Worker {} is now idle", workerId);
         }
     }
 
@@ -142,6 +137,7 @@ public class Worker implements Runnable {
         if (isIdle) {
             isIdle = false;
             pool.decrementIdleThreads();
+            logger.info("Worker {} is now busy", workerId);
         }
     }
 
@@ -150,6 +146,7 @@ public class Worker implements Runnable {
         Thread thread = currentThread;
         if (thread != null) {
             thread.interrupt();
+            logger.info("Worker {} has been interrupted", workerId);
         }
     }
 
@@ -158,6 +155,7 @@ public class Worker implements Runnable {
         Thread thread = currentThread;
         if (thread != null) {
             thread.interrupt();
+            logger.info("Worker {} has been interrupted immediately", workerId);
         }
     }
 

@@ -1,11 +1,15 @@
 package ru.skillfactory.custom.thread.pool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// Фабрику для создания потоков, которая будет присваивает потокам уникальные имена
-// и логирует события их создания и завершения.
+// Фабрика для создания потоков, которая будет присваивать потокам уникальные имена
+// и логировать события их создания и завершения.
 public class CustomThreadFactory implements ThreadFactory {
+    private static final Logger logger = LoggerFactory.getLogger(CustomThreadFactory.class);
     private final AtomicInteger threadCounter = new AtomicInteger(0);
     private final String poolName;
 
@@ -16,14 +20,14 @@ public class CustomThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         String threadName = poolName + "-Thread-" + threadCounter.incrementAndGet();
-        System.out.println("Creating new thread: " + threadName);
+        logger.info("Creating new thread: {}", threadName);
         return new Thread(r, threadName) {
             @Override
             public void run() {
                 try {
                     super.run();
                 } finally {
-                    System.out.println("Thread " + getName() + " terminated");
+                    logger.info("Thread {} terminated", getName());
                 }
             }
         };

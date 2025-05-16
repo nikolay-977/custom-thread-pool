@@ -1,0 +1,7 @@
+Configuration,PoolType,AvgTimeMs,MinTimeMs,MaxTimeMs,TasksCompleted,TotalTasks,SuccessRate%
+Small Pool,CustomThreadPool,188,11,13,36,100,36.00
+Small Pool,ThreadPoolExecutor,64,10,13,18,100,18.00
+Medium Pool,CustomThreadPool,256,10,13,88,100,88.00
+Medium Pool,ThreadPoolExecutor,48,10,13,28,100,28.00
+Large Pool,CustomThreadPool,250,10,14,100,100,100.00
+Large Pool,ThreadPoolExecutor,57,10,20,56,100,56.00
