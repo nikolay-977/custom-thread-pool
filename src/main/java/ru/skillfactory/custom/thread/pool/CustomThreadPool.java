@@ -10,7 +10,6 @@ public class CustomThreadPool implements CustomExecutor {
     private final int maxPoolSize;
     private final long keepAliveTime;
     private final TimeUnit timeUnit;
-    private final int queueSize;
     private final int minSpareThreads;
     private final CustomRejectedExecutionHandler rejectedExecutionHandler;
 
@@ -18,8 +17,8 @@ public class CustomThreadPool implements CustomExecutor {
     private final List<Worker> workers = new ArrayList<>(); // Добавлено поле для хранения worker'ов
     private final AtomicInteger totalThreads = new AtomicInteger(0);
     private final AtomicInteger idleThreads = new AtomicInteger(0);
-    private volatile boolean isShutdown = false;
     private final ThreadFactory threadFactory;
+    private volatile boolean isShutdown = false;
 
     public CustomThreadPool(int corePoolSize, int maxPoolSize, long keepAliveTime, TimeUnit timeUnit,
                             int queueSize, int minSpareThreads,
@@ -33,7 +32,6 @@ public class CustomThreadPool implements CustomExecutor {
         this.maxPoolSize = maxPoolSize;
         this.keepAliveTime = keepAliveTime;
         this.timeUnit = timeUnit;
-        this.queueSize = queueSize;
         this.minSpareThreads = minSpareThreads;
         this.rejectedExecutionHandler = rejectedExecutionHandler;
 
@@ -221,14 +219,33 @@ public class CustomThreadPool implements CustomExecutor {
     }
 
     // Геттеры
-    public int getCorePoolSize() { return corePoolSize; }
-    public int getMaxPoolSize() { return maxPoolSize; }
-    public int getMinSpareThreads() { return minSpareThreads; }
-    public long getKeepAliveTime() { return keepAliveTime; }
-    public TimeUnit getKeepAliveTimeUnit() { return timeUnit; }
-    public int getTotalThreads() { return totalThreads.get(); }
-    public int getIdleThreads() { return idleThreads.get(); }
-    public boolean isShutdown() { return isShutdown; }
+    public int getCorePoolSize() {
+        return corePoolSize;
+    }
+
+    public int getMinSpareThreads() {
+        return minSpareThreads;
+    }
+
+    public long getKeepAliveTime() {
+        return keepAliveTime;
+    }
+
+    public TimeUnit getKeepAliveTimeUnit() {
+        return timeUnit;
+    }
+
+    public int getTotalThreads() {
+        return totalThreads.get();
+    }
+
+    public int getIdleThreads() {
+        return idleThreads.get();
+    }
+
+    public boolean isShutdown() {
+        return isShutdown;
+    }
 
     public List<CustomTaskQueue> getTaskQueues() {
         return taskQueues;

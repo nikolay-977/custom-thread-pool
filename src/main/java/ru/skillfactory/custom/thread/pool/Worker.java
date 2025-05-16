@@ -156,24 +156,8 @@ public class Worker implements Runnable {
         }
     }
 
-    public long getWorkerId() {
-        return workerId;
-    }
-
-    public long getCompletedTasks() {
-        return completedTasks;
-    }
-
     public long getIdleTime() {
         return isIdle ? System.currentTimeMillis() - lastActivityTime : 0;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public boolean isIdle() {
-        return isIdle;
     }
 
     @Override

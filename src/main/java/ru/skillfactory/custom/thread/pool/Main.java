@@ -15,7 +15,7 @@ public class Main {
 //        demo(new RetryPolicy(), "MyPoolWithRetriedTasks");
     }
 
-    private static void demo(CustomRejectedExecutionHandler customRejectedExecutionHandler, String poolName){
+    private static void demo(CustomRejectedExecutionHandler customRejectedExecutionHandler, String poolName) {
         // Создаем пул потоков
         CustomThreadPool pool = new CustomThreadPool(
                 2, 4, 5, TimeUnit.SECONDS, 5, 1, customRejectedExecutionHandler, poolName);
