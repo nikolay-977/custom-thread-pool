@@ -12,7 +12,7 @@ public class Worker implements Runnable {
     private Runnable firstTask;
     private volatile boolean isActive = true;
     private volatile Thread currentThread;
-    private final AtomicInteger completedTasks = new AtomicInteger();
+    private int completedTasks = 0;
     private volatile long lastActivityTime = System.currentTimeMillis();
     private volatile boolean isIdle = true;
 
@@ -58,7 +58,7 @@ public class Worker implements Runnable {
         try {
             markBusy();
             task.run();
-            completedTasks.incrementAndGet();
+            completedTasks++;
             lastActivityTime = System.currentTimeMillis();
         } catch (RuntimeException e) {
             System.out.printf(
@@ -169,6 +169,6 @@ public class Worker implements Runnable {
     public String toString() {
         return String.format(
                 "Worker[%d, active=%b, idle=%b, tasks=%d, idleTime=%dms]",
-                workerId, isActive, isIdle, completedTasks.get(), getIdleTime());
+                workerId, isActive, isIdle, completedTasks, getIdleTime());
     }
 }

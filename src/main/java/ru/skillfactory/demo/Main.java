@@ -1,4 +1,9 @@
-package ru.skillfactory.custom.thread.pool;
+package ru.skillfactory.demo;
+
+import ru.skillfactory.custom.thread.pool.CustomRejectedExecutionHandler;
+import ru.skillfactory.custom.thread.pool.CustomThreadPool;
+import ru.skillfactory.custom.thread.pool.RejectPolicy;
+import ru.skillfactory.custom.thread.pool.RetryPolicy;
 
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
