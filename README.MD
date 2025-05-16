@@ -6,7 +6,7 @@
 
 ```bash
 git clone https://github.com/nikolay-977/custom-thread-pool
-cd banking-api
+cd custom-thread-pool
  ```
 
 2. Скомпилируйте проект:
